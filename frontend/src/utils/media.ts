@@ -7,14 +7,14 @@
  * This utility builds the full URL for rendering in the frontend.
  */
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://13.61.190.166";
 
 /**
  * Build a full media URL from a relative path stored in the database.
  *
  * @example
  * buildMediaUrl("/uploads/public/stays/cm1abc123-beach-villa/pool-view.jpg")
- * // → "http://localhost:4000/uploads/public/stays/cm1abc123-beach-villa/pool-view.jpg"
+ * // → "http://13.61.190.166/uploads/public/stays/cm1abc123-beach-villa/pool-view.jpg"
  */
 export const buildMediaUrl = (path: string): string => {
   if (!path) return "";

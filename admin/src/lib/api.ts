@@ -10,7 +10,7 @@ if (!API_BASE_URL) {
 }
 
 const api = axios.create({
-  baseURL: API_BASE_URL ?? "http://localhost:4000/api/v1",
+  baseURL: API_BASE_URL ?? "http://13.61.190.166/api/v1",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -36,7 +36,7 @@ api.interceptors.response.use(
 
         // Use the same base URL from env — no hardcoded localhost
         const response = await axios.post(
-          `${API_BASE_URL ?? "http://localhost:4000/api/v1"}/auth/refresh`,
+          `${API_BASE_URL ?? "http://13.61.190.166/api/v1"}/auth/refresh`,
           { refreshToken }
         );
         const { accessToken, refreshToken: newRefreshToken } = response.data.data.tokens;
