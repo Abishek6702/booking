@@ -1,0 +1,48 @@
+# Build / dependency artefacts — re-installed inside the image
+node_modules
+dist
+build
+coverage
+
+# Local environment — secrets must come from the docker compose env_file or
+# from the deployment platform, never baked into the image
+.env
+.env.local
+.env.*.local
+.env.example
+
+# VCS, IDE, OS
+.git
+.gitignore
+.gitattributes
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Logs and one-off scratch files (already gitignored)
+*.log
+scratch
+*.scratch.ts
+create-test-data.ts
+db-check.ts
+test-login.ts
+azure_test.json
+full_search.json
+search_results.json
+search.txt
+
+# Uploads — runtime data, mounted as a docker volume
+uploads
+
+# Test / CI artefacts
+jest.e2e.config.cjs
+tests
+**/*.test.ts
+**/*.spec.ts
+
+# Docker meta — no need to ship these into the image
+Dockerfile
+.dockerignore
+docker-compose*.yml
+docker-compose*.yaml

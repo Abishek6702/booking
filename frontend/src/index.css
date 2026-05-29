@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 220 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 15%;
+
+    --primary: 220 70% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 30% 95%;
+    --secondary-foreground: 220 30% 25%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 50%;
+
+    --accent: 38 95% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 25% 90%;
+    --input: 214 25% 90%;
+    --ring: 220 70% 45%;
+
+    --radius: 0.625rem;
+
+    --success: 155 65% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 95% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    --teal: 174 60% 45%;
+    --teal-foreground: 0 0% 100%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 220 70% 45%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 210 30% 95%;
+    --sidebar-accent-foreground: 220 30% 25%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 220 70% 45%;
+  }
+
+  .dark {
+    --background: 222 40% 8%;
+    --foreground: 210 40% 98%;
+    --card: 222 40% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 40% 12%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 220 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 30% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 30% 18%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 38 95% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 30% 20%;
+    --input: 217 30% 20%;
+    --ring: 220 70% 55%;
+    --sidebar-background: 222 40% 10%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 220 70% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 30% 18%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 217 30% 18%;
+    --sidebar-ring: 220 70% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  @keyframes ticket-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-ticket-fade-up {
+    animation: ticket-fade-up 220ms ease-out;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-teal;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Global tactile click feedback for all interactive elements.
+
+   Applies a subtle press animation to every clickable element by default so
+   the entire app feels responsive — no need to remember to add it per page.
+
+   Opt out with `.no-press` on an element when the press animation conflicts
+   (e.g. icon-only chip toggles where scaling looks weird).
+   ────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  button,
+  [role="button"],
+  a[href],
+  summary,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    /* Smooth motion for color, background, transform, shadow */
+    transition-property: transform, background-color, color, border-color, box-shadow, opacity;
+    transition-duration: 150ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Tactile press: subtle scale-down on click */
+  button:not(:disabled):not(.no-press):active,
+  [role="button"]:not([aria-disabled="true"]):not(.no-press):active,
+  a[href]:not(.no-press):active,
+  summary:not(.no-press):active,
+  input[type="button"]:not(:disabled):not(.no-press):active,
+  input[type="submit"]:not(:disabled):not(.no-press):active,
+  input[type="reset"]:not(:disabled):not(.no-press):active {
+    transform: scale(0.96);
+    transition-duration: 75ms;
+  }
+
+  /* Disabled state should never animate or shift */
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Respect users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    button,
+    [role="button"],
+    a[href],
+    summary,
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"] {
+      transition-duration: 0ms !important;
+    }
+    button:active,
+    [role="button"]:active,
+    a[href]:active,
+    summary:active {
+      transform: none !important;
+    }
+  }
+}

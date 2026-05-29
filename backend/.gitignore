@@ -1,0 +1,35 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.docker
+
+# Build output
+dist/
+build/
+
+# Scratch / one-off scripts
+scratch/
+*.scratch.ts
+
+# Uploads (user-generated content — structure preserved via .gitkeep)
+uploads/*
+!uploads/.gitkeep
+!uploads/public/
+!uploads/private/
+!uploads/temp/
+uploads/public/*
+!uploads/public/.gitkeep
+uploads/private/*
+!uploads/private/.gitkeep
+uploads/temp/*
+!uploads/temp/.gitkeep
+
+# Migration reports (generated at runtime)
+migration-report.json
+
+# Logs
+*.log
+
+# Node
+node_modules/

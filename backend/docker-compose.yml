@@ -1,0 +1,133 @@
+# ==============================================================================
+# TravelMate backend — Docker Compose stack
+#
+# Database: Supabase (external, cloud-hosted). No local postgres container.
+# Cache:    Redis 7 (local container).
+# App:      Single backend container (modular monolith).
+#
+# Why no local postgres / prisma-init:
+#   The project uses Supabase as its PostgreSQL provider. The schema is
+#   already live on Supabase. Running a local postgres container would be
+#   a separate, empty database that the app would never actually use.
+#   `prisma db push` / `prisma migrate deploy` should be run against
+#   Supabase directly from your local machine when the schema changes.
+#
+# Quick start:
+#
+#     cp .env.docker.example .env.docker
+#     # Fill in DATABASE_URL, DIRECT_URL, JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
+#     docker compose --env-file .env.docker up --build
+#
+# Run in background:
+#
+#     docker compose --env-file .env.docker up --build -d
+#
+# Stop:
+#
+#     docker compose down
+# ==============================================================================
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --save
+      - "60"
+      - "1"
+      - --loglevel
+      - warning
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # DATABASE_URL and DIRECT_URL are passed as build-time ARGs so that
+      # `prisma generate` (triggered by the postinstall hook during `npm ci`)
+      # can resolve the datasource URL from prisma.config.ts.
+      # They are NOT baked into the final image layer — only the intermediate
+      # deps stage uses them. The runtime container receives them via
+      # `environment:` below.
+      args:
+        DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required for the Docker build}
+        DIRECT_URL: ${DIRECT_URL:-${DATABASE_URL}}
+    image: travelmate-backend:local
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_HOST_PORT:-4000}:4000"
+    environment:
+      # ── Core ─────────────────────────────────────────────────────────────
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 4000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_HTTP_REQUESTS: ${LOG_HTTP_REQUESTS:-false}
+      SERVICE_NAME: ${SERVICE_NAME:-travelmate-backend}
+
+      # ── Datastores ───────────────────────────────────────────────────────
+      # DATABASE_URL points to Supabase (connection pooler).
+      # DIRECT_URL points to Supabase (direct connection, used by Prisma for
+      # migrations and introspection).
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      DIRECT_URL: ${DIRECT_URL:-${DATABASE_URL}}
+      REDIS_URL: redis://redis:6379
+
+      # ── Auth ─────────────────────────────────────────────────────────────
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required}
+      JWT_ACCESS_EXPIRES: ${JWT_ACCESS_EXPIRES:-15m}
+      JWT_REFRESH_EXPIRES: ${JWT_REFRESH_EXPIRES:-7d}
+      ADMIN_REGISTRATION_CODE: ${ADMIN_REGISTRATION_CODE:-}
+      SUPER_ADMIN_ID: ${SUPER_ADMIN_ID:-}
+
+      # ── CORS / app surface ───────────────────────────────────────────────
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
+      FRONTEND_URL: ${FRONTEND_URL:-}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+
+      # ── Mail (optional — required for password reset / verification) ─────
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+
+      # ── Tunables ─────────────────────────────────────────────────────────
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-12}
+      BOOKING_TAX_RATE: ${BOOKING_TAX_RATE:-0.15}
+      BOOKING_HOLD_DURATION_MINUTES: ${BOOKING_HOLD_DURATION_MINUTES:-10}
+      AUTH_RATE_LIMIT_MAX: ${AUTH_RATE_LIMIT_MAX:-10}
+      BOOKING_RATE_LIMIT_MAX: ${BOOKING_RATE_LIMIT_MAX:-30}
+      SEARCH_RATE_LIMIT_MAX: ${SEARCH_RATE_LIMIT_MAX:-100}
+      DISABLE_JOBS: ${DISABLE_JOBS:-false}
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          node -e "fetch('http://127.0.0.1:4000/api/v1/health')
+          .then(r => process.exit(r.ok ? 0 : 1))
+          .catch(() => process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  redis_data:
+  backend_uploads:
