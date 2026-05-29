@@ -18,7 +18,7 @@ interface ClosedStreamMessage {
 type StreamMessage = ReplyStreamMessage | ClosedStreamMessage;
 
 const buildTicketStreamUrl = (ticketId: string): string => {
-  const apiBaseUrl = String(api.defaults.baseURL ?? "http://localhost:4000/api/v1");
+  const apiBaseUrl = String(api.defaults.baseURL ?? import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api/v1");
   const origin = apiBaseUrl.replace(/\/api\/v1\/?$/, "");
   const streamUrl = new URL(`/api/v1/support/tickets/${ticketId}/stream`, origin);
 

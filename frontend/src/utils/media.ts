@@ -7,7 +7,7 @@
  * This utility builds the full URL for rendering in the frontend.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 /**
  * Build a full media URL from a relative path stored in the database.
@@ -26,7 +26,7 @@ export const buildMediaUrl = (path: string): string => {
 
   // Ensure path starts with /
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${normalizedPath}`;
+  return `${BACKEND_URL}${normalizedPath}`;
 };
 
 /**
@@ -36,5 +36,5 @@ export const buildMediaUrl = (path: string): string => {
 export const buildLegacyMediaUrl = (filename: string): string => {
   if (!filename) return "";
   if (filename.startsWith("http")) return filename;
-  return `${API_BASE_URL}/uploads/${filename}`;
+  return `${BACKEND_URL}/uploads/${filename}`;
 };
